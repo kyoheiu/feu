@@ -4,6 +4,7 @@ use iced::{text_input, Column, Element, Sandbox, Settings, Text, TextInput};
 struct Lists {
     input: text_input::State,
     input_value: String,
+    cursor: usize,
     bins: Vec<String>,
 }
 
@@ -87,5 +88,19 @@ impl Sandbox for Lists {
 }
 
 fn main() -> iced::Result {
-    Lists::run(Settings::default())
+    let window_setting = iced::window::Settings {
+        size: (800, 400),
+        min_size: None,
+        max_size: None,
+        resizable: false,
+        decorations: false,
+        transparent: true,
+        always_on_top: true,
+        icon: None,
+    };
+    let setting = Settings {
+        window: window_setting,
+        ..Default::default()
+    };
+    Lists::run(setting)
 }
