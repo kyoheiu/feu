@@ -5,6 +5,7 @@ struct Lists {
     input_value: String,
     cursor: usize,
     bins: Vec<String>,
+    filtered: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -28,11 +29,14 @@ impl Default for Lists {
             let name = bin.file_name().into_string().unwrap();
             bin_vec.push(name);
         }
+        bin_vec.sort();
+
         Lists {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 1,
-            bins: bin_vec,
+            bins: bin_vec.clone(),
+            filtered: bin_vec,
         }
     }
 }
@@ -57,7 +61,7 @@ impl Sandbox for Lists {
         );
 
         let bins_list: Element<Message> = {
-            self.bins
+            self.filtered
                 .iter()
                 .take(10)
                 .fold(Column::new(), |column, item| {
@@ -80,14 +84,14 @@ impl Sandbox for Lists {
 
     fn update(&mut self, message: Message) {
         match message {
-            Message::InputChanged(filter) => {
-                self.input_value = filter;
-                // self.bins = self
-                //     .bins
-                //     .iter()
-                //     .filter(|item| (*item).contains(&filter))
-                //     .map(|item| item.to_string())
-                //     .collect();
+            Message::InputChanged(words) => {
+                self.input_value = words;
+                self.filtered = self
+                    .bins
+                    .iter()
+                    .filter(|&item| (*item).contains(&self.input_value))
+                    .map(|item| item.to_string())
+                    .collect();
             }
             Message::MoveCursor(mv) => {}
             Message::Execute => {}
@@ -97,7 +101,7 @@ impl Sandbox for Lists {
 
 fn main() -> iced::Result {
     let window_setting = iced::window::Settings {
-        size: (800, 400),
+        size: (500, 250),
         min_size: None,
         max_size: None,
         resizable: false,
