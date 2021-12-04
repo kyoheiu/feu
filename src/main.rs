@@ -1,6 +1,5 @@
 use iced::{text_input, Column, Element, Sandbox, Settings, Text, TextInput};
 
-#[derive(Default)]
 struct Lists {
     input: text_input::State,
     input_value: String,
@@ -19,6 +18,23 @@ enum Message {
 enum Move {
     Up,
     Down,
+}
+
+impl Default for Lists {
+    fn default() -> Self {
+        let mut bin_vec = vec![];
+        for bin in std::fs::read_dir("/usr/bin").unwrap() {
+            let bin = bin.unwrap();
+            let name = bin.file_name().into_string().unwrap();
+            bin_vec.push(name);
+        }
+        Lists {
+            input: text_input::State::focused(),
+            input_value: "".to_string(),
+            cursor: 1,
+            bins: bin_vec,
+        }
+    }
 }
 
 impl Sandbox for Lists {
@@ -41,14 +57,6 @@ impl Sandbox for Lists {
         );
 
         let bins_list: Element<Message> = {
-            let mut bins = vec![];
-            for bin in std::fs::read_dir("/usr/bin").unwrap() {
-                let bin = bin.unwrap();
-                let name = bin.file_name().into_string().unwrap();
-                bins.push(name);
-            }
-            self.bins = bins;
-
             self.bins
                 .iter()
                 .take(10)
