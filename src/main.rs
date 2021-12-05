@@ -41,7 +41,7 @@ impl Default for Lists {
             scroll: scrollable::State::new(),
             input: text_input::State::focused(),
             input_value: "".to_string(),
-            cursor: 1,
+            cursor: 0,
             bins: bin_vec.clone(),
             filtered: bin_vec,
         }
@@ -68,7 +68,7 @@ impl Application for Lists {
                 .take(5)
                 .enumerate()
                 .fold(Scrollable::new(&mut self.scroll), |column, (i, item)| {
-                    if i + 1 == self.cursor {
+                    if i == self.cursor {
                         column.push(Element::new(Text::new(item).color([0.5, 0.5, 0.5])))
                     } else {
                         column.push(Element::new(Text::new(item)))
@@ -109,20 +109,30 @@ impl Application for Lists {
             }
             Message::MoveCursor(mv) => match mv {
                 Move::Up => {
-                    if self.cursor > 1 {
+                    if self.cursor > 0 {
                         self.cursor -= 1;
                     } else {
                     }
                 }
                 Move::Down => {
-                    if self.cursor < len {
+                    if self.cursor < len - 1 {
                         self.cursor += 1;
                     } else {
                     }
                 }
-                _ => {}
             },
-            Message::Execute => {}
+            Message::Execute => {
+                let bin = self.filtered.get(self.cursor);
+                if let Some(bin) = bin {
+                    std::process::exit(match launch_app(bin) {
+                        Ok(_) => 0,
+                        Err(e) => {
+                            eprintln!("error: {:?}", e);
+                            1
+                        }
+                    });
+                }
+            }
         }
         iced::Command::none()
     }
@@ -135,7 +145,7 @@ impl Application for Lists {
 
             match event {
                 Event::Keyboard(keyboard::Event::KeyPressed {
-                    modifiers,
+                    modifiers: _,
                     key_code,
                 }) => handle_key(key_code),
                 _ => None,
@@ -148,8 +158,13 @@ fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
     match key_code {
         keyboard::KeyCode::Up => Some(Message::MoveCursor(Move::Up)),
         keyboard::KeyCode::Down => Some(Message::MoveCursor(Move::Down)),
+        keyboard::KeyCode::Enter => Some(Message::Execute),
         _ => None,
     }
+}
+
+fn launch_app(bin: &str) -> std::io::Result<std::process::Child> {
+    std::process::Command::new(bin).spawn()
 }
 
 fn main() -> iced::Result {
