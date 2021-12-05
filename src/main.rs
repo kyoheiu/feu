@@ -1,12 +1,11 @@
-use iced::scrollable::{self, Scrollable};
+mod style;
 use iced::{
-    keyboard, text_input, Application, Column, Container, Element, Settings, Subscription, Text,
-    TextInput,
+    keyboard, text_input, Application, Column, Container, Element, Length, Settings, Subscription,
+    Text, TextInput,
 };
-use iced_native::{event, subscription, Event};
+use iced_native::{subscription, Event};
 
 struct Lists {
-    scroll: scrollable::State,
     input: text_input::State,
     input_value: String,
     cursor: usize,
@@ -38,7 +37,6 @@ impl Default for Lists {
         bin_vec.sort();
 
         Lists {
-            scroll: scrollable::State::new(),
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
@@ -62,14 +60,21 @@ impl Application for Lists {
     }
 
     fn view(&mut self) -> Element<Message> {
+        let text_input = TextInput::new(
+            &mut self.input,
+            " Run!",
+            &self.input_value,
+            Message::InputChanged,
+        );
+
         let bins_list: Element<Message> = {
             self.filtered
                 .iter()
-                .take(5)
+                .take(7)
                 .enumerate()
-                .fold(Scrollable::new(&mut self.scroll), |column, (i, item)| {
+                .fold(Column::new(), |column, (i, item)| {
                     if i == self.cursor {
-                        column.push(Element::new(Text::new(item).color([0.5, 0.5, 0.5])))
+                        column.push(Element::new(Text::new(item).color([1.0, 0.5, 0.0])))
                     } else {
                         column.push(Element::new(Text::new(item)))
                     }
@@ -77,17 +82,13 @@ impl Application for Lists {
                 .into()
         };
 
-        let content = Column::new()
-            .padding(20)
-            .push(TextInput::new(
-                &mut self.input,
-                "Run!",
-                &self.input_value,
-                Message::InputChanged,
-            ))
-            .push(bins_list);
+        let content = Column::new().padding(20).push(text_input).push(bins_list);
 
-        Container::new(content).into()
+        Container::new(content)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .style(style::Container)
+            .into()
     }
 
     fn update(
@@ -138,18 +139,17 @@ impl Application for Lists {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        subscription::events_with(|event, status| {
-            if let event::Status::Captured = status {
-                return None;
-            }
-
-            match event {
-                Event::Keyboard(keyboard::Event::KeyPressed {
-                    modifiers: _,
-                    key_code,
-                }) => handle_key(key_code),
+        subscription::events_with(|event, _status| match event {
+            Event::Keyboard(keyboard::Event::KeyPressed {
+                modifiers: _,
+                key_code,
+            }) => match key_code {
+                keyboard::KeyCode::Up | keyboard::KeyCode::Down | keyboard::KeyCode::Enter => {
+                    handle_key(key_code)
+                }
                 _ => None,
-            }
+            },
+            _ => None,
         })
     }
 }
@@ -169,7 +169,7 @@ fn launch_app(bin: &str) -> std::io::Result<std::process::Child> {
 
 fn main() -> iced::Result {
     let window_setting = iced::window::Settings {
-        size: (500, 250),
+        size: (400, 200),
         min_size: None,
         max_size: None,
         resizable: false,
