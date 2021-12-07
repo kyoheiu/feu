@@ -10,6 +10,7 @@ pub struct Lists {
     input: text_input::State,
     input_value: String,
     cursor: usize,
+    page_number: usize,
     bins: Vec<(String, usize)>,
     filtered: Vec<(String, usize)>,
 }
@@ -35,7 +36,6 @@ impl Default for Lists {
             let name = bin.file_name().into_string().unwrap();
             bin_vec.push(name);
         }
-        bin_vec.sort();
 
         let map = if !history_path().exists() {
             let mut map: HashMap<String, usize> = HashMap::new();
@@ -45,7 +45,11 @@ impl Default for Lists {
             update_history(map.clone()).unwrap();
             map
         } else {
-            read_history().unwrap().history_map
+            let mut map = read_history().unwrap().history_map;
+            for bin in bin_vec {
+                map.entry(bin).or_insert(0);
+            }
+            map
         };
 
         let mut bin_vec = map.into_iter().collect::<Vec<(String, usize)>>();
@@ -55,6 +59,7 @@ impl Default for Lists {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
+            page_number: 0,
             bins: bin_vec.clone(),
             filtered: bin_vec,
         }
@@ -85,10 +90,11 @@ impl Application for Lists {
         let bins_list: Element<Message> = {
             self.filtered
                 .iter()
+                .skip(self.page_number * 7)
                 .take(7)
                 .enumerate()
                 .fold(Column::new(), |column, (i, item)| {
-                    if i == self.cursor {
+                    if (i + (self.page_number * 7)) == self.cursor {
                         column.push(Element::new(
                             Text::new(item.0.clone()).color([1.0, 0.5, 0.0]),
                         ))
@@ -113,7 +119,7 @@ impl Application for Lists {
         message: Message,
         _clipboard: &mut iced::Clipboard,
     ) -> iced::Command<Message> {
-        let len = self.bins.len();
+        let len = self.filtered.len();
 
         match message {
             Message::InputChanged(words) => {
@@ -124,16 +130,24 @@ impl Application for Lists {
                     .filter(|&item| (*item.0).contains(&self.input_value))
                     .cloned()
                     .collect();
+                self.cursor = 0;
+                self.page_number = 0;
             }
             Message::MoveCursor(mv) => match mv {
                 Move::Up => {
                     if self.cursor > 0 {
+                        if self.cursor % 7 == 0 {
+                            self.page_number -= 1;
+                        }
                         self.cursor -= 1;
                     } else {
                     }
                 }
                 Move::Down => {
                     if self.cursor < len - 1 {
+                        if (self.cursor + 1) % 7 == 0 {
+                            self.page_number += 1;
+                        }
                         self.cursor += 1;
                     } else {
                     }
