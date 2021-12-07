@@ -185,12 +185,7 @@ impl Application for Lists {
             Event::Keyboard(keyboard::Event::KeyPressed {
                 modifiers: _,
                 key_code,
-            }) => match key_code {
-                keyboard::KeyCode::Up | keyboard::KeyCode::Down | keyboard::KeyCode::Enter => {
-                    handle_key(key_code)
-                }
-                _ => None,
-            },
+            }) => handle_key(key_code),
             _ => None,
         })
     }
@@ -199,7 +194,7 @@ impl Application for Lists {
 fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
     match key_code {
         keyboard::KeyCode::Up => Some(Message::MoveCursor(Move::Up)),
-        keyboard::KeyCode::Down => Some(Message::MoveCursor(Move::Down)),
+        keyboard::KeyCode::Down | keyboard::KeyCode::Tab => Some(Message::MoveCursor(Move::Down)),
         keyboard::KeyCode::Enter => Some(Message::Execute),
         _ => None,
     }

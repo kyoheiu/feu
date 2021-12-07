@@ -30,6 +30,6 @@ pub fn history_path() -> std::path::PathBuf {
     if !history_path.exists() {
         std::fs::create_dir_all(&history_path).unwrap();
     }
-    history_path.push("history.toml");
+    history_path.push(".history");
     history_path
 }
