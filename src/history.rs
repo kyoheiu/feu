@@ -9,7 +9,7 @@ pub struct History {
 pub fn read_history() -> Option<History> {
     let config = history_path();
     if let Ok(history) = std::fs::read_to_string(config) {
-        let deserialized: History = toml::from_str(&history).unwrap();
+        let deserialized: History = ron::from_str(&history).unwrap();
         Some(deserialized)
     } else {
         None
@@ -18,7 +18,7 @@ pub fn read_history() -> Option<History> {
 
 pub fn update_history(map: HashMap<String, usize>) -> std::io::Result<()> {
     let new_history = History { history_map: map };
-    let toml = toml::to_string(&new_history).unwrap();
+    let toml = ron::to_string(&new_history).unwrap();
     std::fs::write(history_path(), toml)?;
     Ok(())
 }
