@@ -33,7 +33,7 @@ jobs:
     - name: Install
       run: |
         pacman -Syu --noconfirm
-        pacman -S rustup --noconfirm
+        pacman -S rustup cmake --noconfirm
         rustup install stable
         rustup default stable
         cargo install --path .
