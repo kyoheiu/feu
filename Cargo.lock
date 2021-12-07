@@ -31,6 +31,7 @@ dependencies = [
  "dirs 4.0.0",
  "iced",
  "iced_native",
+ "rayon",
  "ron",
  "serde",
 ]

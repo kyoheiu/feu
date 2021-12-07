@@ -4,6 +4,7 @@ use iced::{
     TextInput,
 };
 use iced_native::{subscription, Event};
+use rayon::prelude::*;
 use std::collections::HashMap;
 
 pub struct Lists {
@@ -20,6 +21,7 @@ pub enum Message {
     InputChanged(String),
     MoveCursor(Move),
     Execute,
+    Exit,
 }
 
 #[derive(Clone, Debug)]
@@ -52,8 +54,8 @@ impl Default for Lists {
             map
         };
 
-        let mut bin_vec = map.into_iter().collect::<Vec<(String, usize)>>();
-        bin_vec.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        let mut bin_vec = map.into_par_iter().collect::<Vec<(String, usize)>>();
+        bin_vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
         Lists {
             input: text_input::State::focused(),
@@ -126,7 +128,7 @@ impl Application for Lists {
                 self.input_value = words;
                 self.filtered = self
                     .bins
-                    .iter()
+                    .par_iter()
                     .filter(|&item| (*item.0).contains(&self.input_value))
                     .cloned()
                     .collect();
@@ -161,7 +163,7 @@ impl Application for Lists {
                             let mut map = self
                                 .bins
                                 .clone()
-                                .into_iter()
+                                .into_par_iter()
                                 .collect::<HashMap<String, usize>>();
                             if let Some(x) = map.get_mut(&bin.0) {
                                 *x += 1;
@@ -175,6 +177,9 @@ impl Application for Lists {
                         }
                     });
                 }
+            }
+            Message::Exit => {
+                std::process::exit(0);
             }
         }
         iced::Command::none()
@@ -196,6 +201,7 @@ fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
         keyboard::KeyCode::Up => Some(Message::MoveCursor(Move::Up)),
         keyboard::KeyCode::Down | keyboard::KeyCode::Tab => Some(Message::MoveCursor(Move::Down)),
         keyboard::KeyCode::Enter => Some(Message::Execute),
+        keyboard::KeyCode::Escape => Some(Message::Exit),
         _ => None,
     }
 }
