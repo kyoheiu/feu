@@ -82,7 +82,7 @@ impl Application for Lists {
     fn view(&mut self) -> Element<Message> {
         let text_input = TextInput::new(
             &mut self.input,
-            " Run!",
+            "",
             &self.input_value,
             Message::InputChanged,
         );
