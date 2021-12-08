@@ -40,31 +40,31 @@ impl Default for Lists {
             bin_vec.push(name);
         }
 
-        let map = if !history_path().exists() {
-            HashMap::new()
-        } else {
+        let map = if history_path().exists() {
             read_history().unwrap().history_map
+        } else {
+            HashMap::new()
         };
 
-        let mut used_vec = vec![];
+        let mut vec = vec![];
         let mut unused_vec: Vec<(String, usize)> = vec![];
         for bin in bin_vec {
             match map.get(&bin) {
-                Some(x) => used_vec.push((bin, *x)),
+                Some(x) => vec.push((bin, *x)),
                 None => unused_vec.push((bin, 0)),
             }
         }
 
-        used_vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-        used_vec.append(&mut unused_vec);
+        vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        vec.append(&mut unused_vec);
 
         Lists {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
             page_number: 0,
-            bins: used_vec.clone(),
-            filtered: used_vec,
+            bins: vec.clone(),
+            filtered: vec,
             history: map,
         }
     }
