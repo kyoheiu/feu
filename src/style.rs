@@ -18,3 +18,32 @@ impl container::StyleSheet for Container {
         }
     }
 }
+
+pub struct TextInput;
+
+impl text_input::StyleSheet for TextInput {
+    fn active(&self) -> text_input::Style {
+        text_input::Style {
+            border_radius: 0.0,
+            border_width: 0.0,
+            border_color: Color::WHITE,
+            ..Default::default()
+        }
+    }
+
+    fn focused(&self) -> text_input::Style {
+        text_input::Style { ..self.active() }
+    }
+
+    fn placeholder_color(&self) -> Color {
+        Color::WHITE
+    }
+
+    fn value_color(&self) -> Color {
+        Color::BLACK
+    }
+
+    fn selection_color(&self) -> Color {
+        Color::WHITE
+    }
+}
