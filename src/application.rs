@@ -14,6 +14,7 @@ pub struct Lists {
     page_number: usize,
     bins: Vec<(String, usize)>,
     filtered: Vec<(String, usize)>,
+    history: HashMap<String, usize>,
 }
 
 #[derive(Clone, Debug)]
@@ -40,30 +41,29 @@ impl Default for Lists {
         }
 
         let map = if !history_path().exists() {
-            let mut map: HashMap<String, usize> = HashMap::new();
-            for bin in &bin_vec {
-                let _ = map.insert(bin.to_string(), 0);
-            }
-            update_history(map.clone()).unwrap();
-            map
+            HashMap::new()
         } else {
-            let mut map = read_history().unwrap().history_map;
-            for bin in bin_vec {
-                map.entry(bin).or_insert(0);
-            }
-            map
+            read_history().unwrap().history_map
         };
 
-        let mut bin_vec = map.into_par_iter().collect::<Vec<(String, usize)>>();
-        bin_vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        let mut bins = vec![];
+        for bin in bin_vec {
+            match map.get(&bin) {
+                Some(x) => bins.push((bin, *x)),
+                None => bins.push((bin, 0)),
+            }
+        }
+
+        bins.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
         Lists {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
             page_number: 0,
-            bins: bin_vec.clone(),
-            filtered: bin_vec,
+            bins: bins.clone(),
+            filtered: bins,
+            history: map,
         }
     }
 }
@@ -87,7 +87,8 @@ impl Application for Lists {
             "",
             &self.input_value,
             Message::InputChanged,
-        );
+        )
+        .style(super::style::TextInput);
 
         let bins_list: Element<Message> = {
             self.filtered
@@ -107,7 +108,11 @@ impl Application for Lists {
                 .into()
         };
 
-        let content = Column::new().padding(20).push(text_input).push(bins_list);
+        let content = Column::new()
+            .padding(17)
+            .spacing(5)
+            .push(text_input)
+            .push(bins_list);
 
         Container::new(content)
             .width(Length::Fill)
@@ -160,15 +165,9 @@ impl Application for Lists {
                 if let Some(bin) = bin {
                     std::process::exit(match launch_app(&bin.0) {
                         Ok(_) => {
-                            let mut map = self
-                                .bins
-                                .clone()
-                                .into_par_iter()
-                                .collect::<HashMap<String, usize>>();
-                            if let Some(x) = map.get_mut(&bin.0) {
-                                *x += 1;
-                            }
-                            update_history(map).unwrap();
+                            let x = self.history.entry(bin.0.clone()).or_insert(0);
+                            *x += 1;
+                            update_history(self.history.clone()).unwrap();
                             0
                         }
                         Err(e) => {
