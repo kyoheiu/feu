@@ -46,23 +46,25 @@ impl Default for Lists {
             read_history().unwrap().history_map
         };
 
-        let mut bins = vec![];
+        let mut used_vec = vec![];
+        let mut unused_vec: Vec<(String, usize)> = vec![];
         for bin in bin_vec {
             match map.get(&bin) {
-                Some(x) => bins.push((bin, *x)),
-                None => bins.push((bin, 0)),
+                Some(x) => used_vec.push((bin, *x)),
+                None => unused_vec.push((bin, 0)),
             }
         }
 
-        bins.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        used_vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        used_vec.append(&mut unused_vec);
 
         Lists {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
             page_number: 0,
-            bins: bins.clone(),
-            filtered: bins,
+            bins: used_vec.clone(),
+            filtered: used_vec,
             history: map,
         }
     }
@@ -98,11 +100,9 @@ impl Application for Lists {
                 .enumerate()
                 .fold(Column::new(), |column, (i, item)| {
                     if (i + (self.page_number * 7)) == self.cursor {
-                        column.push(Element::new(
-                            Text::new(item.0.clone()).color([1.0, 0.5, 0.0]),
-                        ))
+                        column.push(Element::new(Text::new(&item.0).color([1.0, 0.5, 0.0])))
                     } else {
-                        column.push(Element::new(Text::new(item.0.clone())))
+                        column.push(Element::new(Text::new(&item.0)))
                     }
                 })
                 .into()
