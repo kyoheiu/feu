@@ -87,7 +87,8 @@ impl Application for Lists {
             "",
             &self.input_value,
             Message::InputChanged,
-        );
+        )
+        .style(super::style::TextInput);
 
         let bins_list: Element<Message> = {
             self.filtered
@@ -107,7 +108,11 @@ impl Application for Lists {
                 .into()
         };
 
-        let content = Column::new().padding(20).push(text_input).push(bins_list);
+        let content = Column::new()
+            .padding(17)
+            .spacing(5)
+            .push(text_input)
+            .push(bins_list);
 
         Container::new(content)
             .width(Length::Fill)
