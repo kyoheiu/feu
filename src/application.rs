@@ -87,8 +87,7 @@ impl Application for Lists {
             "",
             &self.input_value,
             Message::InputChanged,
-        )
-        .style(super::style::TextInput);
+        );
 
         let bins_list: Element<Message> = {
             self.filtered
