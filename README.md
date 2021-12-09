@@ -34,7 +34,7 @@ feu accepts text-input and Up/Down/Enter/Esc keys simultaneously: You can enter 
 In other words, if you have a list shown in the one above, you can launch `firefox` just by pressing the Enter key. Or type 'c' and press Enter to launch `code`.
 
 ## Binary list
-Currently feu reads `/usr/bin` directory and lists all binaries in it. And, remembering the number of execution, it sorts the binary list by the number, so the top of the list should be the app you use the most.
+Currently feu reads `/usr/bin` directory and lists all binaries in it. And, remembering the number of execution (by feu), it sorts the binary list by the number, so the top of the list should be the app you use the most.
 The number of execution is automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (RON format). 
 
 ```
