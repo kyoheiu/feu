@@ -6,7 +6,7 @@ pub struct History {
     pub history_map: HashMap<String, usize>,
 }
 
-pub fn read_history(path: &std::path::PathBuf) -> Option<History> {
+pub fn read_history(path: &std::path::Path) -> Option<History> {
     if let Ok(history) = std::fs::read_to_string(path) {
         let deserialized: History = ron::from_str(&history).unwrap();
         Some(deserialized)
@@ -15,10 +15,7 @@ pub fn read_history(path: &std::path::PathBuf) -> Option<History> {
     }
 }
 
-pub fn update_history(
-    map: &HashMap<String, usize>,
-    path: &std::path::PathBuf,
-) -> std::io::Result<()> {
+pub fn update_history(map: &HashMap<String, usize>, path: &std::path::Path) -> std::io::Result<()> {
     let new_history = History {
         history_map: map.clone(),
     };
