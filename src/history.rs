@@ -6,9 +6,8 @@ pub struct History {
     pub history_map: HashMap<String, usize>,
 }
 
-pub fn read_history() -> Option<History> {
-    let config = history_path();
-    if let Ok(history) = std::fs::read_to_string(config) {
+pub fn read_history(path: &std::path::PathBuf) -> Option<History> {
+    if let Ok(history) = std::fs::read_to_string(path) {
         let deserialized: History = ron::from_str(&history).unwrap();
         Some(deserialized)
     } else {
@@ -16,17 +15,22 @@ pub fn read_history() -> Option<History> {
     }
 }
 
-pub fn update_history(map: HashMap<String, usize>) -> std::io::Result<()> {
-    let new_history = History { history_map: map };
+pub fn update_history(
+    map: &HashMap<String, usize>,
+    path: &std::path::PathBuf,
+) -> std::io::Result<()> {
+    let new_history = History {
+        history_map: map.clone(),
+    };
     let toml = ron::to_string(&new_history).unwrap();
-    std::fs::write(history_path(), toml)?;
+    std::fs::write(path, toml)?;
     Ok(())
 }
 
 pub fn history_path() -> std::path::PathBuf {
     let mut history_path = dirs::home_dir().unwrap();
     history_path.push(".config");
-    history_path.push("launcher");
+    history_path.push("feu");
     if !history_path.exists() {
         std::fs::create_dir_all(&history_path).unwrap();
     }

@@ -15,6 +15,7 @@ pub struct Lists {
     bins: Vec<(String, usize)>,
     filtered: Vec<(String, usize)>,
     history: HashMap<String, usize>,
+    path: std::path::PathBuf,
 }
 
 #[derive(Clone, Debug)]
@@ -33,6 +34,8 @@ pub enum Move {
 
 impl Default for Lists {
     fn default() -> Self {
+        let history_path = history_path();
+
         let mut bin_vec = vec![];
         for bin in std::fs::read_dir("/usr/bin").unwrap() {
             let bin = bin.unwrap();
@@ -40,8 +43,8 @@ impl Default for Lists {
             bin_vec.push(name);
         }
 
-        let map = if history_path().exists() {
-            read_history().unwrap().history_map
+        let map = if history_path.exists() {
+            read_history(&history_path).unwrap().history_map
         } else {
             HashMap::new()
         };
@@ -66,6 +69,7 @@ impl Default for Lists {
             bins: vec.clone(),
             filtered: vec,
             history: map,
+            path: history_path,
         }
     }
 }
@@ -167,7 +171,7 @@ impl Application for Lists {
                         Ok(_) => {
                             let x = self.history.entry(bin.0.clone()).or_insert(0);
                             *x += 1;
-                            update_history(self.history.clone()).unwrap();
+                            update_history(&self.history, &self.path).unwrap();
                             0
                         }
                         Err(e) => {
