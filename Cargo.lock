@@ -607,6 +607,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "feu"
+version = "0.1.0"
+dependencies = [
+ "dirs 4.0.0",
+ "iced",
+ "iced_native",
+ "rayon",
+ "ron",
+ "serde",
+]
+
+[[package]]
 name = "fixedbitset"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1325,18 +1337,6 @@ checksum = "b19cc4a81304db2a0ad69740e83cdc3a9364e3f9bd6d88a87288a4c2deec927b"
 dependencies = [
  "libc",
  "libloading 0.6.7",
-]
-
-[[package]]
-name = "lancer"
-version = "0.1.0"
-dependencies = [
- "dirs 4.0.0",
- "iced",
- "iced_native",
- "rayon",
- "ron",
- "serde",
 ]
 
 [[package]]
