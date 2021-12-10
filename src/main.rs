@@ -1,6 +1,8 @@
 mod application;
+mod config;
 mod history;
 mod style;
+
 use iced::Application;
 
 fn main() -> iced::Result {

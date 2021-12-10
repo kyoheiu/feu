@@ -25,8 +25,7 @@ pub fn update_history(map: &HashMap<String, usize>, path: &std::path::Path) -> s
 }
 
 pub fn history_path() -> std::path::PathBuf {
-    let mut history_path = dirs::home_dir().unwrap();
-    history_path.push(".config");
+    let mut history_path = dirs::config_dir().unwrap();
     history_path.push("feu");
     if !history_path.exists() {
         std::fs::create_dir_all(&history_path).unwrap();

@@ -1,3 +1,4 @@
+use super::config::*;
 use super::history::*;
 use iced::{
     keyboard, text_input, Application, Column, Container, Element, Length, Subscription, Text,
@@ -36,11 +37,26 @@ impl Default for Lists {
     fn default() -> Self {
         let history_path = history_path();
 
+        let config = read_config();
+        let mut path_vec = vec![];
+        match config {
+            Some(config) => {
+                for path in config.paths {
+                    path_vec.push(std::path::PathBuf::from(path));
+                }
+            }
+            None => {
+                path_vec.push(std::path::PathBuf::from("/usr/bin"));
+            }
+        }
+
         let mut bin_vec = vec![];
-        for bin in std::fs::read_dir("/usr/bin").unwrap() {
-            let bin = bin.unwrap();
-            let name = bin.file_name().into_string().unwrap();
-            bin_vec.push(name);
+        for path in path_vec {
+            for bin in std::fs::read_dir(&path).unwrap() {
+                let bin = bin.unwrap();
+                let name = bin.file_name().into_string().unwrap();
+                bin_vec.push(name);
+            }
         }
 
         let map = if history_path.exists() {

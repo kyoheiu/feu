@@ -25,7 +25,7 @@ Then you can run feu with `$mod+d`.
 
 | key | action|
 |---|---|
-| Up/Down | moves cursor.|
+| Up/Down | selects.|
 | Enter | launches selected app.|
 | Esc | exits program.|
 | _ | filters the list.|
