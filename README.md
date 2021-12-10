@@ -1,5 +1,5 @@
 # :candle:feu
-A minimal application launcher written in Rust(iced).
+A minimal application launcher written in Rust(iced).  
 Currently works on Linux well.
 
 ![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.jpg)
