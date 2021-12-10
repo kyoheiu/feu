@@ -1,5 +1,6 @@
 # :candle:feu
 A minimal application launcher written in Rust(iced).
+Currently works on Linux well.
 
 ![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.jpg)
 
@@ -44,3 +45,7 @@ The number of execution is automatically saved as `HashMap<(String, usize)>` in 
 ```
 
 If you want to reset it, just delete `.history` and everything will be new. 
+
+## Todo
+- [] support macOS
+- [] support other PATH, such as ~/.cargo/bin

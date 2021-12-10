@@ -2,8 +2,12 @@
 name = "feu"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Kyohei Uto <kyoheiu@outlook.com>"]
+description = "minimal application launcher for tiling window manager"
+readme = "README.md"
+repository = "https://github.com/kyoheiu/feu"
+license = "MIT"
+keywords = ["gui", "launcher"]
 
 [dependencies]
 dirs = "4.0.0"
