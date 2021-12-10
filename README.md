@@ -35,8 +35,23 @@ feu accepts text-input and Up/Down/Enter/Esc keys simultaneously: You can enter 
 In other words, if you have a list shown in the one above, you can launch `firefox` just by pressing the Enter key. Or type 'c' and press Enter to launch `code`.
 
 ## Binary list
-Currently feu reads `/usr/bin` directory and lists all binaries in it. And, remembering the number of execution (by feu), it sorts the binary list by the number, so the top of the list should be the app you use the most.
-The number of execution is automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (RON format). 
+feu reads `~/.config/feu/config`  (RON format) and lists all binaries in `paths`. For example, if the config file looks like this:
+
+```
+Config(
+    paths: [
+    "/usr/bin",
+    "/home/username/.cargo/bin"
+    ]
+)
+```
+
+Then feu lists binaries in `/usr/bin` and `/home/username/.cargo/bin`. If the config file doesn't exist, only `/usr/bin` is read.
+
+*Currently, `~` is not allowed in the config file, so you have to write like `/home/username/...`, which is not smart IMO.*
+
+And, remembering the number of execution, feu sorts the binary list by the number, so the top of the list should be the app you use the most.  
+The number of execution is automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (which is also RON format). 
 
 ```
 # ~/.config/feu/.history
@@ -47,5 +62,5 @@ The number of execution is automatically saved as `HashMap<(String, usize)>` in 
 If you want to reset it, just delete `.history` and everything will be new. 
 
 ## Todo
-- [] support macOS
-- [] support other PATH, such as ~/.cargo/bin
+- [x] support other PATHs, such as `~/.cargo/bin`
+- [ ] support macOS
