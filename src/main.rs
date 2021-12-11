@@ -20,5 +20,5 @@ fn main() -> iced::Result {
         window: window_setting,
         ..Default::default()
     };
-    application::Lists::run(setting)
+    application::State::run(setting)
 }

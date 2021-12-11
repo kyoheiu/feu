@@ -8,7 +8,7 @@ use iced_native::{subscription, Event};
 use rayon::prelude::*;
 use std::collections::HashMap;
 
-pub struct Lists {
+pub struct State {
     input: text_input::State,
     input_value: String,
     cursor: usize,
@@ -33,7 +33,7 @@ pub enum Move {
     Down,
 }
 
-impl Default for Lists {
+impl Default for State {
     fn default() -> Self {
         let history_path = history_path();
 
@@ -77,7 +77,7 @@ impl Default for Lists {
         vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
         vec.append(&mut unused_vec);
 
-        Lists {
+        State {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
@@ -90,7 +90,7 @@ impl Default for Lists {
     }
 }
 
-impl Application for Lists {
+impl Application for State {
     type Executor = iced::executor::Default;
     type Message = Message;
     type Flags = ();
