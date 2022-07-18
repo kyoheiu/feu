@@ -1,35 +1,39 @@
-use serde::{Deserialize, Serialize};
+use super::errors::FeuError;
+use miniserde::{json, Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize)]
 pub struct History {
     pub history_map: HashMap<String, usize>,
 }
 
-pub fn read_history(path: &std::path::Path) -> Option<History> {
+pub fn read_history(path: &Path) -> Result<History, FeuError> {
     if let Ok(history) = std::fs::read_to_string(path) {
-        let deserialized: History = ron::from_str(&history).unwrap();
-        Some(deserialized)
+        let deserialized: History = json::from_str(&history)?;
+        Ok(deserialized)
     } else {
-        None
+        Ok(History {
+            history_map: HashMap::new(),
+        })
     }
 }
 
-pub fn update_history(map: &HashMap<String, usize>, path: &std::path::Path) -> std::io::Result<()> {
+pub fn update_history(map: &HashMap<String, usize>, path: &Path) -> Result<(), FeuError> {
     let new_history = History {
         history_map: map.clone(),
     };
-    let toml = ron::to_string(&new_history).unwrap();
-    std::fs::write(path, toml)?;
+    let new_history = json::to_string(&new_history);
+    std::fs::write(path, new_history)?;
     Ok(())
 }
 
-pub fn history_path() -> std::path::PathBuf {
+pub fn history_path() -> Result<PathBuf, FeuError> {
     let mut history_path = dirs::config_dir().unwrap();
     history_path.push("feu");
     if !history_path.exists() {
-        std::fs::create_dir_all(&history_path).unwrap();
+        std::fs::create_dir_all(&history_path)?;
     }
     history_path.push(".history");
-    history_path
+    Ok(history_path)
 }

@@ -1,4 +1,5 @@
 use super::config::*;
+use super::generate::generate_bin_vec;
 use super::history::*;
 use iced::{
     keyboard, text_input, Application, Column, Container, Element, Length, Subscription, Text,
@@ -35,56 +36,48 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let history_path = history_path();
+        let path_vec = generate_path_vec();
+        let bin_vec = generate_bin_vec(path_vec).unwrap_or_default();
 
-        let config = read_config();
-        let mut path_vec = vec![];
-        match config {
-            Some(config) => {
-                for path in config.paths {
-                    path_vec.push(std::path::PathBuf::from(path));
-                }
-            }
-            None => {
-                path_vec.push(std::path::PathBuf::from("/usr/bin"));
-            }
-        }
-
-        let mut bin_vec = vec![];
-        for path in path_vec {
-            for bin in std::fs::read_dir(&path).unwrap() {
-                let bin = bin.unwrap();
-                let name = bin.file_name().into_string().unwrap();
-                bin_vec.push(name);
-            }
-        }
-
-        let map = if history_path.exists() {
-            read_history(&history_path).unwrap().history_map
+        let history_path = history_path().unwrap_or_default();
+        let mut history_map = if history_path.exists() {
+            read_history(&history_path)
+                .unwrap_or(History {
+                    history_map: HashMap::new(),
+                })
+                .history_map
         } else {
             HashMap::new()
         };
+        let history_map_clone = history_map.clone();
 
-        let mut vec = vec![];
-        let mut unused_vec: Vec<(String, usize)> = vec![];
+        let mut used_bins = vec![];
+        let mut unused_bins: Vec<(String, usize)> = vec![];
         for bin in bin_vec {
-            match map.get(&bin) {
-                Some(x) => vec.push((bin, *x)),
-                None => unused_vec.push((bin, 0)),
+            if !history_map.is_empty() {
+                match history_map.get(&bin) {
+                    Some(x) => {
+                        used_bins.push((bin.clone(), *x));
+                        let _removed = history_map.remove(&bin);
+                    }
+                    None => unused_bins.push((bin, 0)),
+                }
+            } else {
+                unused_bins.push((bin, 0));
             }
         }
 
-        vec.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-        vec.append(&mut unused_vec);
+        used_bins.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        used_bins.append(&mut unused_bins);
 
         State {
             input: text_input::State::focused(),
             input_value: "".to_string(),
             cursor: 0,
             page_number: 0,
-            bins: vec.clone(),
-            filtered: vec,
-            history: map,
+            bins: used_bins.clone(),
+            filtered: used_bins,
+            history: history_map_clone,
             path: history_path,
         }
     }
@@ -100,7 +93,7 @@ impl Application for State {
     }
 
     fn title(&self) -> String {
-        String::from("Launcher - Iced")
+        String::from("feu")
     }
 
     fn view(&mut self) -> Element<Message> {
@@ -141,11 +134,7 @@ impl Application for State {
             .into()
     }
 
-    fn update(
-        &mut self,
-        message: Message,
-        _clipboard: &mut iced::Clipboard,
-    ) -> iced::Command<Message> {
+    fn update(&mut self, message: Message) -> iced::Command<Message> {
         let len = self.filtered.len();
 
         match message {
@@ -187,11 +176,13 @@ impl Application for State {
                         Ok(_) => {
                             let x = self.history.entry(bin.0.clone()).or_insert(0);
                             *x += 1;
-                            update_history(&self.history, &self.path).unwrap();
+                            if let Err(e) = update_history(&self.history, &self.path) {
+                                eprintln!("Error when updating history: {}", e);
+                            }
                             0
                         }
-                        Err(e) => {
-                            eprintln!("error: {:?}", e);
+                        Err(_) => {
+                            eprintln!("Error when launching {}.", bin.0);
                             1
                         }
                     });
