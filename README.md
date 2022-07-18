@@ -1,17 +1,19 @@
 # :candle:feu
-A minimal application launcher written in Rust(iced).  
+
+A minimal application launcher written in Rust, using Iced.  
 Currently works on Linux well.
 
 ![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.jpg)
 
 ## Installation
+
 ```
 git clone https://github.com/kyoheiu/feu.git
 cd feu
 cargo install --path .
 ```
 
-Since this app is designed to be used with a tiling window manager like i3, the post-installation setting should look like this:
+This app is designed to be used with a tiling window manager such as i3, so after the installation, the configuration is as follows, for example:
 
 ```
 # ~/.config/i3/config
@@ -23,44 +25,41 @@ Then you can run feu with `$mod+d`.
 
 ## Usage
 
-| key | action|
-|---|---|
-| Up/Down | selects.|
-| Enter | launches selected app.|
-| Esc | exits program.|
-| _ | filters the list.|
+| key     | action                    |
+| ------- | ------------------------- |
+| Up/Down | Move cursor.              |
+| Enter   | Launche the selected app. |
+| Esc     | Exit.                     |
+| \_      | Filter the list.          |
 
-
-feu accepts text-input and Up/Down/Enter/Esc keys simultaneously: You can enter words to filter the list and move the cursor without using the mouse.
-In other words, if you have a list shown in the one above, you can launch `firefox` just by pressing the Enter key. Or type 'c' and press Enter to launch `code`.
+For example, with a list like the one in the image above, you can start `firefox` simply by pressing the Enter key. You can also start `code` by typing `c' and pressing the Enter key.
 
 ## Binary list
-feu reads `~/.config/feu/config`  (RON format) and lists all binaries in `paths`. For example, if the config file looks like this:
+
+feu reads `~/.config/feu/config.json` (JSON format) and lists all binaries in `paths`. If the config file looks like this:
 
 ```
-Config(
-    paths: [
-    "/usr/bin",
-    "/home/username/.cargo/bin"
-    ]
-)
+{
+  "paths": ["/usr/bin", "/home/user/.cargo/bin"]
+}
 ```
 
-Then feu lists binaries in `/usr/bin` and `/home/username/.cargo/bin`. If the config file doesn't exist, only `/usr/bin` is read.
+Then feu lists binaries in `/usr/bin` and `/home/user/.cargo/bin`. If the config file doesn't exist, only `/usr/bin` will be read.
 
-*Currently, `~` is not allowed in the config file, so you have to write like `/home/username/...`, which is not smart IMO.*
+_Currently, `~` is not allowed in the config file, so you have to write like `/home/user/...`._
 
-And, remembering the number of execution, feu sorts the binary list by the number, so the top of the list should be the app you use the most.  
-The number of execution is automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (which is also RON format). 
+At the launch, feu sorts the binary list by the number of execution, so the top of the list should be the app you call the most.
+The execution history will be automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (which is also JSON format).
 
 ```
 # ~/.config/feu/.history
 
-(history_map:{"code":2,"firefox":3})
+{"history_map":{"code":2,"firefox":3}}
 ```
 
-If you want to reset it, just delete `.history` and everything will be new. 
+If you want to reset it, just delete `.history` and everything will be new.
 
 ## Todo
-- [x] support other PATHs, such as `~/.cargo/bin`
+
+- [x] support other PATHs, such as `/home/user/.cargo/bin`
 - [ ] support macOS
