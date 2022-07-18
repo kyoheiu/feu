@@ -6,7 +6,6 @@ use iced::{
     TextInput,
 };
 use iced_native::{subscription, Event};
-use rayon::prelude::*;
 use std::collections::HashMap;
 
 pub struct State {
@@ -67,7 +66,7 @@ impl Default for State {
             }
         }
 
-        used_bins.par_sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        used_bins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
         used_bins.append(&mut unused_bins);
 
         State {
@@ -140,12 +139,15 @@ impl Application for State {
         match message {
             Message::InputChanged(words) => {
                 self.input_value = words;
-                self.filtered = self
-                    .bins
-                    .par_iter()
-                    .filter(|&item| (*item.0).contains(&self.input_value))
-                    .cloned()
-                    .collect();
+
+                let mut new_filtered = vec![];
+                for bin in &self.bins {
+                    if bin.0.contains(&self.input_value) {
+                        new_filtered.push((bin.0.clone(), bin.1));
+                    }
+                }
+                self.filtered = new_filtered;
+
                 self.cursor = 0;
                 self.page_number = 0;
             }

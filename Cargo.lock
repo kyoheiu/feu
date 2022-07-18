@@ -487,13 +487,12 @@ dependencies = [
 
 [[package]]
 name = "feu"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "dirs",
  "iced",
  "iced_native",
  "miniserde",
- "rayon",
  "thiserror",
 ]
 
