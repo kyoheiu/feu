@@ -1,12 +1,17 @@
 use super::config::*;
-use super::generate::generate_bin_vec;
 use super::history::*;
 use iced::{
-    keyboard, text_input, Application, Column, Container, Element, Length, Subscription, Text,
-    TextInput,
+    keyboard, text_input, Application, Column, Container, Element, Length, Rule, Subscription,
+    Text, TextInput,
 };
 use iced_native::{subscription, Event};
 use std::collections::HashMap;
+
+const PADDING: u16 = 17;
+const SPACING: u16 = 5;
+const COLUMNS: usize = 7;
+const RULE_HEIGHT: u16 = 10;
+const HIGHLIGHT: [f32; 4] = [0.72, 0.84, 0.227, 1.0]; //#B7D63A
 
 pub struct State {
     input: text_input::State,
@@ -31,6 +36,8 @@ pub enum Message {
 pub enum Move {
     Up,
     Down,
+    // Right,
+    // Left,
 }
 
 impl Default for State {
@@ -104,15 +111,17 @@ impl Application for State {
         )
         .style(super::style::TextInput);
 
+        let rule = Rule::horizontal(RULE_HEIGHT).style(super::style::Rule);
+
         let bins_list: Element<Message> = {
             self.filtered
                 .iter()
-                .skip(self.page_number * 7)
+                .skip(self.page_number * COLUMNS)
                 .take(7)
                 .enumerate()
                 .fold(Column::new(), |column, (i, item)| {
-                    if (i + (self.page_number * 7)) == self.cursor {
-                        column.push(Element::new(Text::new(&item.0).color([1.0, 0.5, 0.0])))
+                    if (i + (self.page_number * COLUMNS)) == self.cursor {
+                        column.push(Element::new(Text::new(&item.0).color(HIGHLIGHT)))
                     } else {
                         column.push(Element::new(Text::new(&item.0)))
                     }
@@ -121,9 +130,10 @@ impl Application for State {
         };
 
         let content = Column::new()
-            .padding(17)
-            .spacing(5)
+            .padding(PADDING)
+            .spacing(SPACING)
             .push(text_input)
+            .push(rule)
             .push(bins_list);
 
         Container::new(content)
@@ -154,7 +164,7 @@ impl Application for State {
             Message::MoveCursor(mv) => match mv {
                 Move::Up => {
                     if self.cursor > 0 {
-                        if self.cursor % 7 == 0 {
+                        if self.cursor % COLUMNS == 0 {
                             self.page_number -= 1;
                         }
                         self.cursor -= 1;
@@ -163,13 +173,26 @@ impl Application for State {
                 }
                 Move::Down => {
                     if self.cursor < len - 1 {
-                        if (self.cursor + 1) % 7 == 0 {
+                        if (self.cursor + 1) % COLUMNS == 0 {
                             self.page_number += 1;
                         }
                         self.cursor += 1;
                     } else {
                     }
-                }
+                } // Move::Right => {
+                  //     if len > COLUMNS && self.cursor < len - COLUMNS {
+                  //         self.cursor += COLUMNS;
+                  //         self.page_number += 1;
+                  //     } else {
+                  //     }
+                  // }
+                  // Move::Left => {
+                  //     if self.cursor > COLUMNS - 1 {
+                  //         self.cursor -= COLUMNS;
+                  //         self.page_number -= 1;
+                  //     } else {
+                  //     }
+                  // }
             },
             Message::Execute => {
                 let bin = self.filtered.get(self.cursor);
@@ -212,6 +235,8 @@ fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
     match key_code {
         keyboard::KeyCode::Up => Some(Message::MoveCursor(Move::Up)),
         keyboard::KeyCode::Down | keyboard::KeyCode::Tab => Some(Message::MoveCursor(Move::Down)),
+        // keyboard::KeyCode::Right => Some(Message::MoveCursor(Move::Right)),
+        // keyboard::KeyCode::Left => Some(Message::MoveCursor(Move::Left)),
         keyboard::KeyCode::Enter => Some(Message::Execute),
         keyboard::KeyCode::Escape => Some(Message::Exit),
         _ => None,
