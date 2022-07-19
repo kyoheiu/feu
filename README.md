@@ -32,7 +32,7 @@ Then you can run feu with `$mod+d`.
 | Esc     | Exit.                     |
 | \_      | Filter the list.          |
 
-For example, with a list like the one in the image above, you can start `firefox` simply by pressing the Enter key. You can also start `code` by typing `c' and pressing the Enter key.
+For example, with a list like the one in the image above, you can start `firefox` simply by pressing the Enter key. You can also start `code` by typing 'c' and pressing the Enter key.
 
 ## Binary list
 
@@ -48,7 +48,7 @@ Then feu lists binaries in `/usr/bin` and `/home/user/.cargo/bin`. If the config
 
 _Currently, `~` is not allowed in the config file, so you have to write like `/home/user/...`._
 
-At the launch, feu sorts the binary list by the number of execution, so the top of the list should be the app you call the most.
+At the launch, feu sorts the binary list by the number of execution, so the top of the list should be the app you've called the most.  
 The execution history will be automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (which is also JSON format).
 
 ```
@@ -57,7 +57,7 @@ The execution history will be automatically saved as `HashMap<(String, usize)>` 
 {"history_map":{"code":2,"firefox":3}}
 ```
 
-If you want to reset it, just delete `.history` and everything will be new.
+If you want to reset it, just delete or rename `.history` and everything will be new.
 
 ## Todo
 
