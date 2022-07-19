@@ -3,7 +3,7 @@
 A minimal application launcher written in Rust, using Iced.  
 Currently works on Linux well.
 
-![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.jpg)
+![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.png)
 
 ## Installation
 
