@@ -42,15 +42,15 @@ fn generate_path_vec() -> Vec<PathBuf> {
     path_vec
 }
 
-pub fn generate_bin_vec() -> Result<Vec<String>, FeuError> {
-    let mut bin_vec = vec![];
+pub fn generate_bin_vec() -> Result<HashSet<String>, FeuError> {
+    let mut bin_set = HashSet::new();
     for path in generate_path_vec() {
         for bin in std::fs::read_dir(&path)? {
             let bin = bin?;
             if let Ok(name) = bin.file_name().into_string() {
-                bin_vec.push(name);
+                bin_set.insert(name);
             }
         }
     }
-    Ok(bin_vec)
+    Ok(bin_set)
 }
