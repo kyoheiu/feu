@@ -42,8 +42,7 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let path_vec = generate_path_vec();
-        let bin_vec = generate_bin_vec(path_vec).unwrap_or_default();
+        let bin_vec = generate_bin_vec().unwrap_or_default();
 
         let history_path = history_path().unwrap_or_default();
         let mut history_map = if history_path.exists() {
