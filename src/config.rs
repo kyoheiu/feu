@@ -17,7 +17,9 @@ pub fn read_config() -> Config {
             }
         }
     } else {
-        panic!("Cannot read the config file.");
+            Config {
+                paths: vec![String::from("/usr/bin")],
+            }
     }
 }
 
