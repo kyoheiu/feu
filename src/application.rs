@@ -42,11 +42,10 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let path_vec = generate_path_vec();
-        let bin_vec = generate_bin_vec(path_vec).unwrap_or_default();
+        let mut bin_set = generate_bin_vec().unwrap_or_default();
 
         let history_path = history_path().unwrap_or_default();
-        let mut history_map = if history_path.exists() {
+        let history_map = if history_path.exists() {
             read_history(&history_path)
                 .unwrap_or(History {
                     history_map: HashMap::new(),
@@ -59,18 +58,18 @@ impl Default for State {
 
         let mut used_bins = vec![];
         let mut unused_bins: Vec<(String, usize)> = vec![];
-        for bin in bin_vec {
-            if !history_map.is_empty() {
-                match history_map.get(&bin) {
-                    Some(x) => {
-                        used_bins.push((bin.clone(), *x));
-                        let _removed = history_map.remove(&bin);
-                    }
-                    None => unused_bins.push((bin, 0)),
+
+        for h in history_map {
+            match bin_set.get(&h.0) {
+                Some(_) => {
+                    bin_set.remove(&h.0);
+                    used_bins.push(h);
                 }
-            } else {
-                unused_bins.push((bin, 0));
+                None => {}
             }
+        }
+        for bin in bin_set {
+            unused_bins.push((bin, 0));
         }
 
         used_bins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());

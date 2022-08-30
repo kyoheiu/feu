@@ -1,5 +1,6 @@
 use super::errors::*;
 use miniserde::{json, Deserialize, Serialize};
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -7,33 +8,33 @@ pub struct Config {
     pub paths: Vec<String>,
 }
 
-pub fn read_config() -> Config {
-    if let Ok(config) = std::fs::read_to_string(config_path()) {
-        if let Ok(deserialized) = json::from_str(&config) {
-            deserialized
-        } else {
-            Config {
-                paths: vec![String::from("/usr/bin")],
-            }
-        }
-    } else {
-            Config {
-                paths: vec![String::from("/usr/bin")],
-            }
-    }
-}
-
-pub fn config_path() -> std::path::PathBuf {
+fn config_path() -> std::path::PathBuf {
     let mut config_path = dirs::config_dir().unwrap();
     config_path.push("feu");
     config_path.push("config.json");
     config_path
 }
 
-pub fn generate_path_vec() -> Vec<PathBuf> {
-    let config = read_config();
+fn read_path() -> HashSet<String> {
+    let paths = std::env::var("PATH").unwrap();
+    let mut set = HashSet::new();
+    for path in paths.split(':') {
+        set.insert(path.to_string());
+    }
+    if let Ok(config) = std::fs::read_to_string(config_path()) {
+        if let Ok::<Config, miniserde::Error>(deserialized) = json::from_str(&config) {
+            for p in deserialized.paths {
+                set.insert(p);
+            }
+        }
+    }
+    set
+}
+
+fn generate_path_vec() -> Vec<PathBuf> {
+    let config = read_path();
     let mut path_vec = vec![];
-    for path in config.paths {
+    for path in config {
         if let Ok(path) = PathBuf::from(path).canonicalize() {
             path_vec.push(path);
         }
@@ -41,15 +42,15 @@ pub fn generate_path_vec() -> Vec<PathBuf> {
     path_vec
 }
 
-pub fn generate_bin_vec(path_vec: Vec<PathBuf>) -> Result<Vec<String>, FeuError> {
-    let mut bin_vec = vec![];
-    for path in path_vec {
+pub fn generate_bin_vec() -> Result<HashSet<String>, FeuError> {
+    let mut bin_set = HashSet::new();
+    for path in generate_path_vec() {
         for bin in std::fs::read_dir(&path)? {
             let bin = bin?;
             if let Ok(name) = bin.file_name().into_string() {
-                bin_vec.push(name);
+                bin_set.insert(name);
             }
         }
     }
-    Ok(bin_vec)
+    Ok(bin_set)
 }
