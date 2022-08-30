@@ -36,20 +36,20 @@ For example, with a list like the one in the image above, you can start `firefox
 
 ## Binary list
 
-feu reads `~/.config/feu/config.json` (JSON format) and lists all binaries in `paths`. If the config file looks like this:
+feu reads $PATH and `~/.config/feu/config.json` (JSON format), and lists all binaries there. If the config file looks like this:
 
 ```
 {
-  "paths": ["/usr/bin", "/home/user/.cargo/bin"]
+  "paths": ["/home/kyohei/.cargo/bin/", "home/kyohei/.test/bin/"]
 }
 ```
 
-Then feu lists binaries in `/usr/bin` and `/home/user/.cargo/bin`. If the config file doesn't exist, only `/usr/bin` will be read.
+Then feu lists binaries in $PATH, `/home/kyohei/.cargo/bin` and `/home/kyohei/.test/bin`. If the config file doesn't exist, only $PATH will be read (and I think that's enough).
 
 _Currently, `~` is not allowed in the config file, so you have to write like `/home/user/...`._
 
 At the launch, feu sorts the binary list by the number of execution, so the top of the list should be the app you've called the most.  
-The execution history will be automatically saved as `HashMap<(String, usize)>` in `~/.config/feu/.history` (which is also JSON format).
+The execution history will be automatically saved in `~/.config/feu/.history` (which is also JSON format).
 
 ```
 # ~/.config/feu/.history
@@ -57,9 +57,4 @@ The execution history will be automatically saved as `HashMap<(String, usize)>` 
 {"history_map":{"code":2,"firefox":3}}
 ```
 
-If you want to reset it, just delete or rename `.history` and everything will be new.
-
-## Todo
-
-- [x] support other PATHs, such as `/home/user/.cargo/bin`
-- [ ] support macOS
+If you want to reset it, just delete the `.history` file and everything will be new.
