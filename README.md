@@ -1,6 +1,6 @@
 # :candle:feu
 
-A minimal application launcher written in Rust, using Iced.  
+A minimal application launcher written in Rust.  
 Currently works on Linux.
 
 ![sample](https://github.com/kyoheiu/feu/blob/develop/screenshot/sample.png)
@@ -8,12 +8,16 @@ Currently works on Linux.
 ## Installation
 
 ```
+cargo install feu
+```
+or, 
+```
 git clone https://github.com/kyoheiu/feu.git
 cd feu
 cargo install --path .
 ```
 
-This app is designed to be used with a tiling window manager such as i3, so after the installation, the configuration is as follows, for example:
+This app is designed to be used with a tiling window manager such as i3, so after the installation, configure as follows, for example:
 
 ```
 # ~/.config/i3/config
@@ -28,7 +32,7 @@ Then you can run feu with `$mod+d`.
 | key     | action                    |
 | ------- | ------------------------- |
 | Up/Down | Move cursor.              |
-| Enter   | Launch the selected app.  |
+| Enter   | Launch the selected app and exit.  |
 | Esc     | Exit.                     |
 | \_      | Filter the list.          |
 
@@ -36,7 +40,7 @@ For example, with a list like the one in the image above, you can start `firefox
 
 ## Binary list
 
-feu reads $PATH and `~/.config/feu/config.json` (JSON format), and lists all binaries there. If the config file looks like this:
+feu reads $PATH and `~/.config/feu/config.json`, and lists all binaries there. If the config file looks like this:
 
 ```
 {
