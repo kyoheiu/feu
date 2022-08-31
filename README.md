@@ -8,6 +8,10 @@ Currently works on Linux.
 ## Installation
 
 ```
+cargo install feu
+```
+or, 
+```
 git clone https://github.com/kyoheiu/feu.git
 cd feu
 cargo install --path .
