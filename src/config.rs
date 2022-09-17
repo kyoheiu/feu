@@ -1,6 +1,5 @@
 use super::errors::*;
 use miniserde::{json, Deserialize, Serialize};
-use std::collections::HashSet;
 use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,42 +14,40 @@ fn config_path() -> std::path::PathBuf {
     config_path
 }
 
-fn read_path() -> HashSet<String> {
-    let paths = std::env::var("PATH").unwrap();
-    let mut set = HashSet::new();
-    for path in paths.split(':') {
-        set.insert(path.to_string());
+fn read_path() -> Result<Vec<PathBuf>, FeuError> {
+    let mut v = Vec::new();
+    let paths = std::env::var("PATH")?;
+    for p in paths.split(':') {
+        if !v.contains(&p.to_string()) {
+            v.push(p.to_string());
+        }
     }
     if let Ok(config) = std::fs::read_to_string(config_path()) {
-        if let Ok::<Config, miniserde::Error>(deserialized) = json::from_str(&config) {
-            for p in deserialized.paths {
-                set.insert(p);
+        let deserialized: Config = json::from_str(&config)?;
+        for p in deserialized.paths {
+            if !v.contains(&p) {
+                v.push(p);
             }
         }
     }
-    set
+    let mut v: Vec<PathBuf> = v
+        .iter()
+        .filter_map(|x| PathBuf::from(x).canonicalize().ok())
+        .collect();
+    v.sort();
+    v.dedup();
+    Ok(v)
 }
 
-fn generate_path_vec() -> Vec<PathBuf> {
-    let config = read_path();
-    let mut path_vec = vec![];
-    for path in config {
-        if let Ok(path) = PathBuf::from(path).canonicalize() {
-            path_vec.push(path);
-        }
-    }
-    path_vec
-}
-
-pub fn generate_bin_vec() -> Result<HashSet<String>, FeuError> {
-    let mut bin_set = HashSet::new();
-    for path in generate_path_vec() {
+pub fn generate_bin_vec() -> Result<Vec<String>, FeuError> {
+    let mut bin_v = Vec::new();
+    for path in read_path()? {
         for bin in std::fs::read_dir(&path)? {
             let bin = bin?;
             if let Ok(name) = bin.file_name().into_string() {
-                bin_set.insert(name);
+                bin_v.push(name);
             }
         }
     }
-    Ok(bin_set)
+    Ok(bin_v)
 }
