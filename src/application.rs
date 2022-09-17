@@ -42,7 +42,11 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let mut bin_set = generate_bin_vec().unwrap_or_default();
+        let bin_heap = generate_bin_vec();
+        if bin_heap.is_err() {
+            eprintln!("{:?}", bin_heap.as_ref().unwrap_err());
+        }
+        let bin_heap = bin_heap.unwrap();
 
         let history_path = history_path().unwrap_or_default();
         let history_map = if history_path.exists() {
@@ -59,21 +63,22 @@ impl Default for State {
         let mut used_bins = vec![];
         let mut unused_bins: Vec<(String, usize)> = vec![];
 
-        for h in history_map {
-            match bin_set.get(&h.0) {
-                Some(_) => {
-                    bin_set.remove(&h.0);
-                    used_bins.push(h);
+        if !history_map.is_empty() {
+            for b in bin_heap {
+                match history_map.get(&b) {
+                    Some(i) => {
+                        used_bins.push((b, *i));
+                    }
+                    None => {
+                        unused_bins.push((b, 0));
+                    }
                 }
-                None => {}
             }
+            used_bins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+            used_bins.append(&mut unused_bins);
+        } else {
+            used_bins = bin_heap.iter().map(|x| (x.to_string(), 0)).collect();
         }
-        for bin in bin_set {
-            unused_bins.push((bin, 0));
-        }
-
-        used_bins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-        used_bins.append(&mut unused_bins);
 
         State {
             input: text_input::State::focused(),
@@ -201,7 +206,7 @@ impl Application for State {
                             let x = self.history.entry(bin.0.clone()).or_insert(0);
                             *x += 1;
                             if let Err(e) = update_history(&self.history, &self.path) {
-                                eprintln!("Error when updating history: {}", e);
+                                eprintln!("Error when updating history: {:#?}", e);
                             }
                             0
                         }
