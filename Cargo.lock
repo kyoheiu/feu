@@ -493,7 +493,6 @@ dependencies = [
  "iced",
  "iced_native",
  "miniserde",
- "thiserror",
 ]
 
 [[package]]
