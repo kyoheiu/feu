@@ -42,11 +42,11 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let bin_heap = generate_bin_vec();
-        if bin_heap.is_err() {
-            eprintln!("{:?}", bin_heap.as_ref().unwrap_err());
+        let bin_source = generate_bin_vec();
+        if bin_source.is_err() {
+            eprintln!("{:?}", bin_source.as_ref().unwrap_err());
         }
-        let bin_heap = bin_heap.unwrap();
+        let bin_source = bin_source.unwrap();
 
         let history_path = history_path().unwrap_or_default();
         let history_map = if history_path.exists() {
@@ -64,7 +64,7 @@ impl Default for State {
         let mut unused_bins: Vec<(String, usize)> = vec![];
 
         if !history_map.is_empty() {
-            for b in bin_heap {
+            for b in bin_source {
                 match history_map.get(&b) {
                     Some(i) => {
                         used_bins.push((b, *i));
@@ -77,7 +77,7 @@ impl Default for State {
             used_bins.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
             used_bins.append(&mut unused_bins);
         } else {
-            used_bins = bin_heap.iter().map(|x| (x.to_string(), 0)).collect();
+            used_bins = bin_source.iter().map(|x| (x.to_string(), 0)).collect();
         }
 
         State {
