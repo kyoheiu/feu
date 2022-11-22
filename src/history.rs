@@ -1,11 +1,11 @@
 use super::errors::FeuError;
 use miniserde::{json, Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize)]
 pub struct History {
-    pub history_map: HashMap<String, usize>,
+    pub history_map: BTreeMap<String, usize>,
 }
 
 pub fn read_history(path: &Path) -> Result<History, FeuError> {
@@ -14,12 +14,12 @@ pub fn read_history(path: &Path) -> Result<History, FeuError> {
         Ok(deserialized)
     } else {
         Ok(History {
-            history_map: HashMap::new(),
+            history_map: BTreeMap::new(),
         })
     }
 }
 
-pub fn update_history(map: &HashMap<String, usize>, path: &Path) -> Result<(), FeuError> {
+pub fn update_history(map: &BTreeMap<String, usize>, path: &Path) -> Result<(), FeuError> {
     let new_history = History {
         history_map: map.clone(),
     };

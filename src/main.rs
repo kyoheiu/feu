@@ -30,10 +30,10 @@ fn main() -> iced::Result {
 
 #[cfg(test)]
 mod tests {
-    use super::config::generate_bin_vec;
+    use super::config::generate_bin_set;
     use super::history::*;
     use crate::config::Config;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::{BTreeMap, HashSet};
     use std::path::PathBuf;
     use std::time::Instant;
 
@@ -45,15 +45,15 @@ mod tests {
         let history_map = if history_path.exists() {
             read_history(&history_path)
                 .unwrap_or(History {
-                    history_map: HashMap::new(),
+                    history_map: BTreeMap::new(),
                 })
                 .history_map
         } else {
-            HashMap::new()
+            BTreeMap::new()
         };
 
         for _i in 0..1000 {
-            let bin_source = generate_bin_vec();
+            let bin_source = generate_bin_set();
             if bin_source.is_err() {
                 eprintln!("{:?}", bin_source.as_ref().unwrap_err());
             }
@@ -93,15 +93,15 @@ mod tests {
         let history_map = if history_path.exists() {
             read_history(&history_path)
                 .unwrap_or(History {
-                    history_map: HashMap::new(),
+                    history_map: BTreeMap::new(),
                 })
                 .history_map
         } else {
-            HashMap::new()
+            BTreeMap::new()
         };
 
         for _i in 0..1000 {
-            let mut bin_source = generate_bin_set();
+            let mut bin_source = test_generate_bin_set();
 
             let mut used_bins = vec![];
             let mut unused_bins: Vec<(String, usize)> = vec![];
@@ -162,7 +162,7 @@ mod tests {
         path_vec
     }
 
-    pub fn generate_bin_set() -> HashSet<String> {
+    pub fn test_generate_bin_set() -> HashSet<String> {
         let mut bin_set = HashSet::new();
         for path in generate_path_set() {
             for bin in std::fs::read_dir(&path).unwrap() {

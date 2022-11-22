@@ -5,7 +5,7 @@ use iced::{
     Text, TextInput,
 };
 use iced_native::{subscription, Event};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const PADDING: u16 = 17;
 const SPACING: u16 = 5;
@@ -20,7 +20,7 @@ pub struct State {
     page_number: usize,
     bins: Vec<(String, usize)>,
     filtered: Vec<(String, usize)>,
-    history: HashMap<String, usize>,
+    history: BTreeMap<String, usize>,
     path: std::path::PathBuf,
 }
 
@@ -42,7 +42,7 @@ pub enum Move {
 
 impl Default for State {
     fn default() -> Self {
-        let bin_source = generate_bin_vec();
+        let bin_source = generate_bin_set();
         if bin_source.is_err() {
             eprintln!("{:?}", bin_source.as_ref().unwrap_err());
         }
@@ -52,11 +52,11 @@ impl Default for State {
         let history_map = if history_path.exists() {
             read_history(&history_path)
                 .unwrap_or(History {
-                    history_map: HashMap::new(),
+                    history_map: BTreeMap::new(),
                 })
                 .history_map
         } else {
-            HashMap::new()
+            BTreeMap::new()
         };
         let history_map_clone = history_map.clone();
 

@@ -1,6 +1,6 @@
 use super::errors::*;
 use miniserde::{json, Deserialize, Serialize};
-use std::path::PathBuf;
+use std::{collections::BTreeSet, path::PathBuf};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -14,40 +14,34 @@ fn config_path() -> std::path::PathBuf {
     config_path
 }
 
-fn read_path() -> Result<Vec<PathBuf>, FeuError> {
-    let mut v = Vec::new();
+fn read_path() -> Result<BTreeSet<PathBuf>, FeuError> {
+    let mut set = BTreeSet::new();
     let paths = std::env::var("PATH")?;
     for p in paths.split(':') {
-        if !v.contains(&p.to_string()) {
-            v.push(p.to_string());
-        }
+        set.insert(p.to_string());
     }
     if let Ok(config) = std::fs::read_to_string(config_path()) {
         let deserialized: Config = json::from_str(&config)?;
         for p in deserialized.paths {
-            if !v.contains(&p) {
-                v.push(p);
-            }
+            set.insert(p);
         }
     }
-    let mut v: Vec<PathBuf> = v
+    let set = set
         .iter()
         .filter_map(|x| PathBuf::from(x).canonicalize().ok())
         .collect();
-    v.sort();
-    v.dedup();
-    Ok(v)
+    Ok(set)
 }
 
-pub fn generate_bin_vec() -> Result<Vec<String>, FeuError> {
-    let mut bin_v = Vec::new();
+pub fn generate_bin_set() -> Result<BTreeSet<String>, FeuError> {
+    let mut bin_set = BTreeSet::new();
     for path in read_path()? {
         for bin in std::fs::read_dir(&path)? {
             let bin = bin?;
             if let Ok(name) = bin.file_name().into_string() {
-                bin_v.push(name);
+                bin_set.insert(name);
             }
         }
     }
-    Ok(bin_v)
+    Ok(bin_set)
 }
