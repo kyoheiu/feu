@@ -1,8 +1,8 @@
 [package]
 name = "feu"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
-authors = ["Kyohei Uto <kyoheiu@outlook.com>"]
+authors = ["Kyohei Uto <im@kyoheiu.dev>"]
 description = "minimal application launcher for tiling window managers"
 readme = "README.md"
 repository = "https://github.com/kyoheiu/feu"
