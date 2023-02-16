@@ -36,7 +36,7 @@ fn read_path() -> Result<BTreeSet<PathBuf>, FeuError> {
 pub fn generate_bin_set() -> Result<BTreeSet<String>, FeuError> {
     let mut bin_set = BTreeSet::new();
     for path in read_path()? {
-        for bin in std::fs::read_dir(&path)? {
+        for bin in std::fs::read_dir(path)? {
             let bin = bin?;
             if let Ok(name) = bin.file_name().into_string() {
                 bin_set.insert(name);

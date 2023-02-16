@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub struct FeuError(String);
+pub struct FeuError(pub String);
 
 impl From<std::io::Error> for FeuError {
     fn from(err: std::io::Error) -> Self {
@@ -16,5 +16,11 @@ impl From<std::env::VarError> for FeuError {
 impl From<miniserde::Error> for FeuError {
     fn from(_err: miniserde::Error) -> Self {
         FeuError("Cannot read config json.".to_string())
+    }
+}
+
+impl From<nix::errno::Errno> for FeuError {
+    fn from(err: nix::errno::Errno) -> Self {
+        FeuError(err.to_string())
     }
 }

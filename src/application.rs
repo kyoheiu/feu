@@ -1,4 +1,5 @@
 use super::config::*;
+use super::errors::*;
 use super::history::*;
 use iced::{
     keyboard, text_input, Application, Column, Container, Element, Length, Rule, Subscription,
@@ -6,6 +7,7 @@ use iced::{
 };
 use iced_native::{subscription, Event};
 use std::collections::BTreeMap;
+use std::process::{Command, Stdio};
 
 const PADDING: u16 = 17;
 const SPACING: u16 = 5;
@@ -247,6 +249,25 @@ fn handle_key(key_code: keyboard::KeyCode) -> Option<Message> {
     }
 }
 
-fn launch_app(bin: &str) -> std::io::Result<std::process::Child> {
-    std::process::Command::new(bin).spawn()
+fn launch_app(bin: &str) -> Result<(), FeuError> {
+    match unsafe { nix::unistd::fork() } {
+        Ok(result) => match result {
+            nix::unistd::ForkResult::Parent { child } => {
+                nix::sys::wait::waitpid(Some(child), None)?;
+                Ok(())
+            }
+            nix::unistd::ForkResult::Child => {
+                nix::unistd::setsid()?;
+                let mut ex = Command::new(bin);
+                ex.stdout(Stdio::null())
+                    .stdin(Stdio::null())
+                    .spawn()
+                    .and(Ok(()))
+                    .map_err(|_| FeuError("Cannot spawn a new process.".to_string()))?;
+                drop(ex);
+                std::process::exit(0);
+            }
+        },
+        Err(_e) => Err(FeuError("Cannot fork.".to_string())),
+    }
 }

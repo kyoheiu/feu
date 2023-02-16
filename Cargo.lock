@@ -500,12 +500,13 @@ dependencies = [
 
 [[package]]
 name = "feu"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "dirs",
  "iced",
  "iced_native",
  "miniserde",
+ "nix 0.26.1",
 ]
 
 [[package]]
@@ -1350,6 +1351,20 @@ dependencies = [
  "cfg-if 1.0.0",
  "libc",
  "memoffset 0.6.5",
+]
+
+[[package]]
+name = "nix"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46a58d1d356c6597d08cde02c2f09d785b09e28711837b1ed667dc652c08a694"
+dependencies = [
+ "bitflags",
+ "cfg-if 1.0.0",
+ "libc",
+ "memoffset 0.7.1",
+ "pin-utils",
+ "static_assertions",
 ]
 
 [[package]]
